@@ -14,14 +14,9 @@ in
       type = lib.types.port;
       default = 46000;
     };
-    openFirewall = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = ''
-        Whether to automatically open ports in the firewall.
-      '';
+    rtp-ip = lib.mkOption {
+      type = lib.types.str;
     };
-
   };
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [
@@ -29,20 +24,18 @@ in
       pkgs.helvum
       pkgs.easyeffects
     ];
-    networking.firewall.allowedUDPPorts = lib.optionals cfg.openFirewall [ cfg.rtp-port ];
     services.pipewire.extraConfig.pipewire = {
-      "20-alloria-rtp-source" = {
+      "20-alloria-rtp-sink" = {
         "context.modules" = [
           {
-            name = "libpipewire-module-rtp-source";
+            name = "libpipewire-module-rtp-sink";
             args = {
-              "source.ip" = "::";
-              "source.port" = cfg.rtp-port;
-              "sess.ignore-ssrc" = true; # so that we can restart the sender
+              "destination.ip" = cfg.rtp-ip;
+              "destination.port" = cfg.rtp-port;
               "stream.props" = {
-                "media.class" = "Audio/Source";
-                "node.name" = "rtp-source";
-                "node.description" = "Alloria RTP Escape";
+                "media.class" = "Audio/Sink";
+                "node.name" = "rtp-sink";
+                "node.description" = "Alloria RTP Escape to Control ${cfg.rtp-ip}";
               };
             };
           }

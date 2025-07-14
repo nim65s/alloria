@@ -14,9 +14,6 @@ in
       type = lib.types.port;
       default = 46000;
     };
-    rtp-ip = lib.mkOption {
-      type = lib.types.str;
-    };
     openFirewall = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -31,18 +28,20 @@ in
       pkgs.helvum
       pkgs.easyeffects
     ];
+    networking.firewall.allowedUDPPorts = lib.optionals cfg.openFirewall [ cfg.rtp-port ];
     services.pipewire.extraConfig.pipewire = {
-      "20-alloria-rtp-sink" = {
+      "20-alloria-rtp-source" = {
         "context.modules" = [
           {
-            name = "libpipewire-module-rtp-sink";
+            name = "libpipewire-module-rtp-source";
             args = {
-              "destination.ip" = cfg.rtp-ip;
-              "destination.port" = cfg.rtp-port;
+              "source.ip" = "::";
+              "source.port" = cfg.rtp-port;
+              "sess.ignore-ssrc" = true; # so that we can restart the sender
               "stream.props" = {
-                "media.class" = "Audio/Sink";
-                "node.name" = "rtp-sink";
-                "node.description" = "Alloria RTP Control for ${cfg.rtp-ip}";
+                "media.class" = "Audio/Source";
+                "node.name" = "rtp-source";
+                "node.description" = "Alloria RTP Control";
               };
             };
           }
