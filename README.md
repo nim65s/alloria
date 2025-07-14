@@ -26,12 +26,12 @@ graph
     source-e -- UDP 46000+i --> sink-r
     source-r -- UDP 46000+i --> sink-e
 
-    subgraph Escape room N°i
+    subgraph "Escape room N°i"
         sink-e --> speak-s --> echo -->
         mic-s --> noise-s --> source-e
     end
 
-    subgraph Control room
+    subgraph "Control room"
         sink-r --> speak-r
         mic-r --> noise-r --> source-r
     end
