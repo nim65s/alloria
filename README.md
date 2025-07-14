@@ -20,8 +20,8 @@ graph
 
     mic-s@{ shape: procs}
     speak-s@{ shape: procs}
-    rtp-source-r@{ shape: procs}
-    rtp-sink-r@{ shape: procs}
+    source-r@{ shape: procs}
+    sink-r@{ shape: procs}
 
     source-e -- UDP 46000+i --> sink-r
     source-r -- UDP 46000+i --> sink-e
