@@ -12,10 +12,10 @@ graph
     speak-s["🔊"]
     noise-r("RNNoise + <br>voice detection")
     noise-s("RNNoise")
-    source-e("rtp-source")
-    sink-r("rtp-sink")
+    source-e("rtp-source-e")
+    sink-r("rtp-sink-r")
     source-r("rtp-source")
-    sink-e("sink-e")
+    sink-e("rtp-sink-e")
     echo("Echo cancel")
 
     mic-s@{ shape: procs}
