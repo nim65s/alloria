@@ -34,7 +34,7 @@ in
     };
     playback = lib.mkOption {
       type = lib.types.str;
-      default = ".pci-0000_00_1f.3.analog-stereo";
+      default = "pci-0000_00_1f.3.analog-stereo";
     };
   };
   config = lib.mkIf cfg.enable {
@@ -86,10 +86,11 @@ in
         "pipewire-pulse.service"
       ];
       script = ''
-        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-left} rtp-sink-e:send_FL
-        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-right} rtp-sink-e:send_FR
+        sleep 5
         ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FL alsa_output.${cfg.playback}:playback_FL
         ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FR alsa_output.${cfg.playback}:playback_FR
+        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-left} rtp-sink-e:send_FL
+        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-right} rtp-sink-e:send_FR
       '';
     };
   };

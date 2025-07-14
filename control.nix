@@ -79,10 +79,11 @@ in
         "pipewire-pulse.service"
       ];
       script = ''
-        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.device}:capture_FL rtp-sink-r:send_FL
-        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.device}:capture_FR rtp-sink-r:send_FR
+        sleep 5
         ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-r:receive_FL alsa_output.${cfg.device}:playback_FL
         ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-r:receive_FR alsa_output.${cfg.device}:playback_FR
+        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.device}:capture_FL rtp-sink-r:send_FL
+        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.device}:capture_FR rtp-sink-r:send_FR
       '';
     };
   };
