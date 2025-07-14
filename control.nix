@@ -14,6 +14,13 @@ in
       type = lib.types.port;
       default = 46000;
     };
+    snap-target = lib.mkOption {
+      type = lib.types.str;
+      default = "alsa_input.pci-0000_04_00.6.analog-stereo"; # TODO
+      description = ''
+        The pipewire output to send to snapserver
+      '';
+    };
     openFirewall = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -53,7 +60,10 @@ in
       inherit (cfg) enable openFirewall;
       streams.alloria-control = {
         type = "process";
-        location = "process:///${lib.getExe' pkgs.pipewire "pw-record"}?name=alloria-snapserver&params=-";
+        location = lib.getExe' pkgs.pipewire "pw-record";
+        query = {
+          params = "--target ${cfg.snap-target} -";
+        };
       };
     };
   };
