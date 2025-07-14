@@ -43,6 +43,7 @@ in
       pkgs.helvum
       pkgs.easyeffects
     ];
+    networking.firewall.allowedUDPPorts = lib.optionals cfg.openFirewall [ cfg.rtp-port ];
     services.pipewire.extraConfig.pipewire = {
       "20-alloria-rtp-sink" = {
         "context.modules" = [
