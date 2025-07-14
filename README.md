@@ -12,25 +12,25 @@ graph
     speak-s["🔊"]
     noise-r("RNNoise + <br>voice detection")
     noise-s("RNNoise")
-    source("rtp-source")
-    sink("rtp-sink")
-    server("snapserver")
-    client("snapclient")
+    source-e("rtp-source")
+    sink-r("rtp-sink")
+    source-r("rtp-source")
+    sink-e("sink-e")
     echo("Echo cancel")
 
     mic-s@{ shape: procs}
     speak-s@{ shape: procs}
 
-    source -- UDP 46000 --> sink
-    server -- TCP 1704 --> client
+    source-e -- UDP 46000 --> sink-r
+    source-r -- UDP 46000 --> sink-e
 
     subgraph Escape room
-        client --> speak-s --> echo -->
-        mic-s --> noise-s --> source
+        sink-e --> speak-s --> echo -->
+        mic-s --> noise-s --> source-e
     end
 
     subgraph Control room
-        sink --> speak-r
-        mic-r --> noise-r --> server
+        sink-r --> speak-r
+        mic-r --> noise-r --> source-r
     end
 ```

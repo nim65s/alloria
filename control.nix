@@ -14,12 +14,8 @@ in
       type = lib.types.port;
       default = 46000;
     };
-    snap-target = lib.mkOption {
+    rtp-ip = lib.mkOption {
       type = lib.types.str;
-      default = "alsa_input.pci-0000_04_00.6.analog-stereo"; # TODO
-      description = ''
-        The pipewire output to send to snapserver
-      '';
     };
     openFirewall = lib.mkOption {
       type = lib.types.bool;
@@ -27,6 +23,10 @@ in
       description = ''
         Whether to automatically open ports in the firewall.
       '';
+    };
+    device = lib.mkOption {
+      type = lib.types.str;
+      default = "pci-0000_04_00.6.analog-stereo";
     };
   };
   config = lib.mkIf cfg.enable {
@@ -37,6 +37,22 @@ in
     ];
     networking.firewall.allowedUDPPorts = lib.optionals cfg.openFirewall [ cfg.rtp-port ];
     services.pipewire.extraConfig.pipewire = {
+      "20-alloria-rtp-sink" = {
+        "context.modules" = [
+          {
+            name = "libpipewire-module-rtp-sink";
+            args = {
+              "destination.ip" = cfg.rtp-ip;
+              "destination.port" = cfg.rtp-port;
+              "stream.props" = {
+                "media.class" = "Audio/Sink";
+                "node.name" = "rtp-sink-r";
+                "node.description" = "Alloria RTP Control to Escape ${cfg.rtp-ip}";
+              };
+            };
+          }
+        ];
+      };
       "20-alloria-rtp-source" = {
         "context.modules" = [
           {
@@ -47,24 +63,27 @@ in
               "sess.ignore-ssrc" = true; # so that we can restart the sender
               "stream.props" = {
                 "media.class" = "Audio/Source";
-                "node.name" = "rtp-source";
-                "node.description" = "Alloria RTP Control";
+                "node.name" = "rtp-source-r";
+                "node.description" = "Alloria RTP Control from escape ${cfg.rtp-ip}";
               };
             };
           }
         ];
-
       };
     };
-    services.snapserver = {
-      inherit (cfg) enable openFirewall;
-      streams.alloria-control = {
-        type = "process";
-        location = lib.getExe' pkgs.pipewire "pw-record";
-        query = {
-          params = "--target ${cfg.snap-target} -";
-        };
-      };
+    systemd.user.services.alloria-control-pw-links = {
+      description = "Alloria Control pipewire links";
+      wantedBy = [ "default.target" ];
+      after = [
+        "pipewire.service"
+        "pipewire-pulse.service"
+      ];
+      script = ''
+        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.device}:capture_FL rtp-sink-r:send_FL
+        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.device}:capture_FR rtp-sink-r:send_FR
+        ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-r:receive_FL alsa_output.${cfg.device}:playback_FL
+        ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-r:receive_FR alsa_output.${cfg.device}:playback_FR
+      '';
     };
   };
 }
