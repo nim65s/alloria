@@ -2,7 +2,7 @@
 
 Escape game sound system
 
-## Design
+## Pipewire
 
 ```mermaid
 graph
@@ -36,3 +36,15 @@ graph
         mic-r --> noise-r --> source-r
     end
 ```
+
+## MQTT
+
+Volume can be controlled from MQTT:
+- `alloria/sink` / int: set speaker volume to `$message` (base 100)
+- `alloria/source` / int: set microphone volume to `$message` (base 100)
+- `alloria/sink/mute` / str: mute speaker if and only if `$message == $instance`
+- `alloria/source/mute` / str: mute microphone if and only if `$message == $instance`
+- `alloria/sink/$instance` / int: set `$instance` speaker volume to `$message` (base 100)
+- `alloria/source/$instance` / int: set `$instance` microphone volume to `$message` (base 100)
+- `alloria/sink/mute/$instance` bool: mute `$instance` speaker volume ("0" or "1")
+- `alloria/source/mute/$instance` bool: mute `$instance` microphone volume ("0" or "1")
