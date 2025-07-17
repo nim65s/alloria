@@ -45,54 +45,71 @@ in
     ];
     networking.firewall.allowedUDPPorts = lib.optionals cfg.openFirewall [ cfg.rtp-port ];
     services.pipewire.extraConfig.pipewire = {
-      "20-alloria-rtp-sink" = {
+
+      "20-alloria-netjack2-driver" = {
         "context.modules" = [
           {
-            name = "libpipewire-module-rtp-sink";
+            name = "libpipewire-module-netjack2-driver";
             args = {
-              "destination.ip" = cfg.rtp-ip;
-              "destination.port" = cfg.rtp-port;
+              "net.ip" = "192.168.8.238";
+              "net.port" = 33000;
               "stream.props" = {
-                "media.class" = "Audio/Sink";
-                "node.name" = "rtp-sink-e";
-                "node.description" = "Alloria RTP Escape to Control ${cfg.rtp-ip}";
+                "node.name" = "netjack-driver";
+                "node.description" = "Alloria netjack driver";
               };
             };
           }
         ];
       };
-      "20-alloria-rtp-source" = {
-        "context.modules" = [
-          {
-            name = "libpipewire-module-rtp-source";
-            args = {
-              "source.ip" = "::";
-              "source.port" = cfg.rtp-port;
-              "sess.ignore-ssrc" = true; # so that we can restart the sender
-              "stream.props" = {
-                "media.class" = "Audio/Source";
-                "node.name" = "rtp-source-e";
-                "node.description" = "Alloria RTP Escape from control ${cfg.rtp-ip}";
-              };
-            };
-          }
-        ];
-      };
+
+      # "20-alloria-rtp-sink" = {
+      #   "context.modules" = [
+      #     {
+      #       name = "libpipewire-module-rtp-sink";
+      #       args = {
+      #         "destination.ip" = cfg.rtp-ip;
+      #         "destination.port" = cfg.rtp-port;
+      #         "stream.props" = {
+      #           "media.class" = "Audio/Sink";
+      #           "node.name" = "rtp-sink-e";
+      #           "node.description" = "Alloria RTP Escape to Control ${cfg.rtp-ip}";
+      #         };
+      #       };
+      #     }
+      #   ];
+      # };
+      # "20-alloria-rtp-source" = {
+      #   "context.modules" = [
+      #     {
+      #       name = "libpipewire-module-rtp-source";
+      #       args = {
+      #         "source.ip" = "::";
+      #         "source.port" = cfg.rtp-port;
+      #         "sess.ignore-ssrc" = true; # so that we can restart the sender
+      #         "stream.props" = {
+      #           "media.class" = "Audio/Source";
+      #           "node.name" = "rtp-source-e";
+      #           "node.description" = "Alloria RTP Escape from control ${cfg.rtp-ip}";
+      #         };
+      #       };
+      #     }
+      #   ];
+      # };
     };
-    systemd.user.services.alloria-escape-pw-links = {
-      description = "Alloria Escape pipewire links";
-      wantedBy = [ "default.target" ];
-      after = [
-        "pipewire.service"
-        "pipewire-pulse.service"
-      ];
-      script = ''
-        sleep 5
-        ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FL alsa_output.${cfg.playback}:playback_FL
-        ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FR alsa_output.${cfg.playback}:playback_FR
-        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-left} rtp-sink-e:send_FL
-        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-right} rtp-sink-e:send_FR
-      '';
-    };
+    # systemd.user.services.alloria-escape-pw-links = {
+    #   description = "Alloria Escape pipewire links";
+    #   wantedBy = [ "default.target" ];
+    #   after = [
+    #     "pipewire.service"
+    #     "pipewire-pulse.service"
+    #   ];
+    #   script = ''
+    #     sleep 5
+    #     ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FL alsa_output.${cfg.playback}:playback_FL
+    #     ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FR alsa_output.${cfg.playback}:playback_FR
+    #     ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-left} rtp-sink-e:send_FL
+    #     ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-right} rtp-sink-e:send_FR
+    #   '';
+    # };
   };
 }
