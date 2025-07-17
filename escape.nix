@@ -24,6 +24,10 @@ in
         Whether to automatically open ports in the firewall.
       '';
     };
+    device = lib.mkOption {
+      type = lib.types.str;
+      default = "pci-0000_04_00.6.analog-stereo";
+    };
     capture-left = lib.mkOption {
       type = lib.types.str;
       default = "usb-MUSIC-BOOST_USB_Microphone_MB-306-00.mono-fallback:capture_MONO";
@@ -88,10 +92,14 @@ in
       ];
       script = ''
         sleep 5
-        ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FL alsa_output.${cfg.playback}:playback_FL
-        ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FR alsa_output.${cfg.playback}:playback_FR
-        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-left} rtp-sink-e:send_FL
-        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-right} rtp-sink-e:send_FR
+        # ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FL alsa_output.${cfg.playback}:playback_FL
+        # ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FR alsa_output.${cfg.playback}:playback_FR
+        # ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-left} rtp-sink-e:send_FL
+        # ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.capture-right} rtp-sink-e:send_FR
+        ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FL alsa_output.${cfg.device}:playback_FL
+        ${lib.getExe' pkgs.pipewire "pw-link"} rtp-source-e:receive_FR alsa_output.${cfg.device}:playback_FR
+        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.device}:capture_FL rtp-sink-e:send_FL
+        ${lib.getExe' pkgs.pipewire "pw-link"} alsa_input.${cfg.device}:capture_FR rtp-sink-e:send_FR
       '';
     };
   };
